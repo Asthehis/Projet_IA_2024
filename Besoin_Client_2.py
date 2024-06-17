@@ -15,13 +15,13 @@ arbre = pd.read_csv("Data_Arbre.csv")
 # Sélection des données intéressantes pour l'étude
 x = arbre[['haut_tronc', 'fk_prec_estim', 'tronc_diam', 'haut_tot', 'fk_stadedev']].copy()
 y = arbre[['age_estim']].copy()
-print(x)
-print(y)
+# print(x)
+# print(y)
 
 # Encodage
 encoder = OrdinalEncoder()
 x['fk_stadedev'] = encoder.fit_transform(x[['fk_stadedev']])
-print(x['fk_stadedev'].head())
+# print(x['fk_stadedev'].head())
 
 # Normalisation
 x_norm = (x - x.min()) / (x.max() - x.min())
