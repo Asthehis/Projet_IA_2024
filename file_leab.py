@@ -5,12 +5,11 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 
+
 data=pd.read_csv(r"C:\Users\leabo\Desktop\ISEN 3 ème année\projet\Data_Arbre.csv")
 #print(data.head())
 
 data_selected = data[['longitude', 'latitude', 'haut_tot', 'tronc_diam']].copy()
-
-#print(data_selected.head())
 
 
 scaler = StandardScaler()
