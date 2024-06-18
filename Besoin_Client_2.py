@@ -34,7 +34,7 @@ y_test = y_test.values.ravel()
 
 # Utilisation Random Forest
 # Détermination des paramètres à tester pour le RandomForest
-param_grid = {
+RF_param_grid = {
     'n_estimators': [10, 50, 100, 200],
     'max_depth': [None, 10, 20, 30],
     'min_samples_split': [2, 5, 10],
@@ -47,42 +47,54 @@ param_grid = {
 RF = RandomForestRegressor()
 
 # Utilisation de GridSearch pour déterminer les meilleurs paramètres à utiliser pour ce modèle
-RF_GS = GridSearchCV(estimator=RF, param_grid=param_grid, cv=3, n_jobs=-1, verbose=2)
+RF_GS = GridSearchCV(estimator=RF, param_grid=RF_param_grid, cv=3, n_jobs=-1, verbose=2)
 
 # Entraînement du GridSearch
 RF_GS.fit(x_train, y_train)
 
 # Récupération et affichage des meilleurs paramètres
-best_params = RF_GS.best_params_
-print("Best parameters found: ", best_params)
+RF_best_params = RF_GS.best_params_
+print("RF Best parameters found: ", RF_best_params)
 
 # Récupération du meilleur estimateur et prédiction
 best_RF = RF_GS.best_estimator_
-y_pred = best_RF.predict(x_test)
+RF_y_pred = best_RF.predict(x_test)
 
-# Évaluation du modèle
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-print(f"n_estimators=1 -> Mean Squared Error: {mse}, R^2 Score: {r2}")
-
-# Tests avec plusieurs n_estimateurs (nombre d'arbres) 10, 50, 100 et 200
-"""
-for n in [10, 50, 100, 200]:
-    RF = RandomForestRegressor(n_estimators=n)
-    RF.fit(x_train, y_train)
-    y_pred = RF.predict(x_test)
-    mse = mean_squared_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    print(f"n_estimators={n} -> Mean Squared Error: {mse}, R^2 Score: {r2}")
-"""
 
 # Utilisation CART
-DTR = DecisionTreeRegressor(random_state=0, criterion="poisson").fit(x_train, y_train)
+# Détermination des paramètres à tester pour CART
+CART_param_grid = {
+    'criterion': ['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+    'splitter': ['best', 'random'],
+    'max_depth': [None, 10, 20, 30, 40],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4],
+    'max_features': [None, 'sqrt', 'log2'],
+    'max_leaf_nodes': [None, 10, 20, 30, 40],
+    'min_impurity_decrease': [0.0, 0.01, 0.1]
+}
 
-# Prédiction
-y_pred = DTR.predict(x_test)
+# Création du modèle
+DTR = DecisionTreeRegressor()
+
+# Utilisation de GridSearch pour déterminer les meilleurs paramètres à utiliser pour ce modèle
+CART_GS = GridSearchCV(estimator=DTR, param_grid=CART_param_grid, cv=3, n_jobs=-1, verbose=2)
+
+# Entraînement GridSearch
+CART_GS.fit(x_train, y_train)
+
+# Récupération et affichage des meilleurs paramètres
+CART_best_params = CART_GS.best_params_
+print("CART Best parameters found: ", CART_best_params)
+
+# Récupération du meilleur estimateur et prédiction
+best_CART = CART_GS.best_estimator_
+CART_y_pred = best_CART.predict(x_test)
 
 # Évaluation du modèle
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-print(f"DecisionTreeRegression -> Mean Squared Error: {mse}, R^2 Score: {r2}")
+RF_mse = mean_squared_error(y_test, RF_y_pred)
+RF_r2 = r2_score(y_test, RF_y_pred)
+CART_mse = mean_squared_error(y_test, CART_y_pred)
+CART_r2 = r2_score(y_test, CART_y_pred)
+print(f"Random Forest -> Mean Squared Error: {RF_mse}, R^2 Score: {RF_r2}")
+print(f"DecisionTreeRegression -> Mean Squared Error: {CART_mse}, R^2 Score: {CART_r2}")
