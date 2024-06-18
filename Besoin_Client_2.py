@@ -1,6 +1,4 @@
-import sklearn
-import csv
-import numpy
+import pickle
 import pandas as pd
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.ensemble import RandomForestRegressor
@@ -13,14 +11,15 @@ from sklearn.metrics import mean_squared_error, r2_score
 # Récupération des données
 arbre = pd.read_csv("Data_Arbre.csv")
 
-# Méthode regression Random Forest, CART...Gini index
-# Sélection des données intéressantes pour l'étude
-x = arbre[['haut_tronc', 'fk_prec_estim', 'tronc_diam', 'haut_tot', 'fk_stadedev']].copy()
-y = arbre[['age_estim']].copy()
-
 # Encodage
 encoder = OrdinalEncoder()
-x['fk_stadedev'] = encoder.fit_transform(x[['fk_stadedev']])
+arbre[['fk_stadedev', 'fk_nomtech']] = encoder.fit_transform(arbre[['fk_stadedev', 'fk_nomtech']])
+# encodage label pour fknom
+
+
+# Sélection des données intéressantes pour l'étude
+x = arbre[['haut_tronc', 'fk_stadedev', 'tronc_diam', 'haut_tot', 'fk_nomtech']].copy()
+y = arbre[['age_estim']].copy()
 
 # Normalisation
 x_norm = (x - x.min()) / (x.max() - x.min())
@@ -40,8 +39,7 @@ RF_param_grid = {
     'max_depth': [None, 10, 20, 30],
     'min_samples_split': [2, 5, 10],
     'min_samples_leaf': [1, 2, 4],
-    'max_features': ['auto', 'sqrt', 'log2'],
-    'bootstrap': [True, False]
+    'max_features': ['auto', 'sqrt', 'log2']
 }
 
 # Création du modèle
@@ -55,7 +53,6 @@ RF_GS.fit(x_train, y_train)
 
 # Récupération et affichage des meilleurs paramètres
 RF_best_params = RF_GS.best_params_
-print("RF Best parameters found: ", RF_best_params)
 
 # Récupération du meilleur estimateur et prédiction
 best_RF = RF_GS.best_estimator_
@@ -86,7 +83,6 @@ CART_GS.fit(x_train, y_train)
 
 # Récupération et affichage des meilleurs paramètres
 CART_best_params = CART_GS.best_params_
-print("CART Best parameters found: ", CART_best_params)
 
 # Récupération du meilleur estimateur et prédiction
 best_CART = CART_GS.best_estimator_
@@ -114,38 +110,11 @@ GBR_GS.fit(x_train, y_train)
 
 # Récupération et affichage des meilleurs paramètres
 GBR_best_params = GBR_GS.best_params_
-print("GBR Best parameters found: ", GBR_best_params)
 
 # Récupération du meilleur estimateur et prédiction
 best_GBR = GBR_GS.best_estimator_
 GBR_y_pred = best_GBR.predict(x_test)
 
-# Utilisation SVR
-# Détermination des paramètres à tester pour SVR
-SVR_param_grid = {
-    'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
-    'C': [0.1, 1, 10, 100],
-    'gamma': ['scale', 'auto'],
-    'degree': [2, 3, 4]
-}
-"""
-# Création du modèle
-SVR_model = SVR()
-
-# Utilisation de GridSearch pour déterminer les meilleurs paramètres à utiliser pour ce modèle
-SVR_GS = GridSearchCV(estimator=SVR_model, param_grid=SVR_param_grid, cv=3, n_jobs=-1, verbose=2)
-
-# Entraînement GridSearch
-SVR_GS.fit(x_train, y_train)
-
-# Récupération et affichage des meilleurs paramètres
-SVR_best_params = SVR_GS.best_params_
-print("SVR Best parameters found: ", SVR_best_params)
-
-# Récupération du meilleur estimateur et prédiction
-best_SVR = SVR_GS.best_estimator_
-SVR_y_pred = best_SVR.predict(x_test)
-"""
 # Évaluation des modèles et affichages des scores obtenus
 RF_mse = mean_squared_error(y_test, RF_y_pred)
 RF_r2 = r2_score(y_test, RF_y_pred)
@@ -153,9 +122,9 @@ CART_mse = mean_squared_error(y_test, CART_y_pred)
 CART_r2 = r2_score(y_test, CART_y_pred)
 GBR_mse = mean_squared_error(y_test, GBR_y_pred)
 GBR_r2 = r2_score(y_test, GBR_y_pred)
-#SVR_mse = mean_squared_error(y_test, SVR_y_pred)
-#SVR_r2 = r2_score(y_test, SVR_y_pred)
+print("RF Best parameters found: ", RF_best_params)
+print("CART Best parameters found: ", CART_best_params)
+print("GBR Best parameters found: ", GBR_best_params)
 print(f"Random Forest -> Mean Squared Error: {RF_mse}, R^2 Score: {RF_r2}")
 print(f"DecisionTreeRegression -> Mean Squared Error: {CART_mse}, R^2 Score: {CART_r2}")
 print(f"GradientBoostingRegressor -> Mean Squared Error: {GBR_mse}, R^2 Score: {GBR_r2}")
-#print(f"SupportVectorRegressor -> Mean Squared Error: {SVR_mse}, R^2 Score: {SVR_r2}")
