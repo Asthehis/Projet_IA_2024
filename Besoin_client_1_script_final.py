@@ -7,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import plotly.express as px
 import numpy as np
+from sklearn.cluster import DBSCAN
+
 
 nb_clusters = int(input("Veuillez choisir un nombre de catégories : "))
 def besoin_1(nb_clusters):
@@ -27,8 +29,9 @@ def besoin_1(nb_clusters):
     spectral = SpectralClustering(n_clusters=nb_clusters)
     labels = spectral.fit_predict(data_scaled)
     score = silhouette_score(data_scaled, labels)
-    print("Prédiction 3 : ", labels)
+    print("Prédiction : ", labels)
     print("Silhouette score", score)
+
 
     # Visualisation sur la carte
     data_selection = pd.concat([data_selection, pd.DataFrame({"cluster": labels})], axis=1)
@@ -37,6 +40,26 @@ def besoin_1(nb_clusters):
     fig_1.update_layout(title_text="Hauteur des arbres dans chaque cluster")
     fig.show()
     fig_1.show()
+
+    # Fonctionnalité supplémentaire : Détection des anomalies
+    # Hauteur du tronc, haut_tot, tronc_diam, age_estim, fk_prec_estim
+    data_anomalies = data[["longitude", "latitude", "fk_prec_estim", "tronc_diam"]].copy()
+    data_anomalies_scaled = scaler.fit_transform(data_anomalies)
+    dbscan = DBSCAN(eps=1.5, min_samples=8) # 2 à 4 fois le nombre de colonnes choisi
+    clusters = dbscan.fit_predict(data_anomalies_scaled)
+    data_anomalies['cluster'] = clusters
+    outliers = data_anomalies[data_anomalies['cluster'] == -1]
+    print("Number of outliers :", len(outliers))
+    plt.figure(figsize=(10,13))
+    plt.scatter(data_anomalies['fk_prec_estim'], data_anomalies['tronc_diam'], c=data_anomalies['cluster'], cmap='coolwarm', label = 'Clusters')
+    plt.scatter(outliers['fk_prec_estim'], outliers['tronc_diam'], c='black', label='Outliers', marker='x')
+    plt.xlabel("Précision de l'âge estimé")
+    plt.ylabel("Diamètre du tronc")
+    plt.title("Détection des Anomalies des Arbres avec DBSCAN, en fonction de la précision de l'âge estimé et du diamètre du tronc")
+    plt.colorbar(label='Cluster')
+    plt.show()
+
+
 
 besoin_1(nb_clusters)
 

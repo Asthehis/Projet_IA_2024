@@ -13,6 +13,8 @@ from sklearn.metrics import normalized_mutual_info_score
 import matplotlib.pyplot as plt
 import plotly.express as px
 import numpy as np
+from sklearn.cluster import DBSCAN
+from sklearn.neighbors import NearestNeighbors
 
 
 # Préparation des Données
@@ -60,7 +62,7 @@ data_scaled = scaler.fit_transform(data_selection[['haut_tot']])
 # Spectral clustering
 silhouette_scores = []
 for k in range(2, 10):
-    spectral = SpectralClustering(n_clusters=k)
+    spectral = SpectralClustering(n_clusters=3)
     labels_2 = spectral.fit_predict(data_scaled)
     score_2 = silhouette_score(data_scaled, labels_2)
     silhouette_scores.append(score_2)
@@ -124,4 +126,40 @@ fig_1 = px.box(data_selection, x = "cluster", y = "haut_tot")
 fig_1.update_layout(title_text="Hauteur des arbres dans chaque cluster")
 fig.show()
 fig_1.show()
+
+# Fonctionnalité supplémentaire : Détection des anomalies
+# Recherche du meilleur eps
+data_anomalies = data[["longitude", "latitude", "fk_prec_estim", "tronc_diam"]].copy()
+data_anomalies_scaled = scaler.fit_transform(data_anomalies)
+neighbors = NearestNeighbors(n_neighbors=10)
+neighbors_fit = neighbors.fit(data_anomalies_scaled)
+distances, indices = neighbors_fit.kneighbors(data_anomalies_scaled)
+
+# Trier les distances pour tracer la "coude"
+distances = np.sort(distances[:, 4], axis=0)
+plt.figure(figsize=(10, 6))
+plt.plot(distances)
+plt.ylabel('Distance')
+plt.xlabel('Points de données ordonnés')
+plt.title('Graphique des distances des K-Plus-Proches-Voisins')
+plt.show()
+
+# Hauteur du tronc, haut_tot, tronc_diam, age_estim, fk_prec_estim
+data_anomalies = data[["longitude", "latitude", "fk_prec_estim", "tronc_diam"]].copy()
+data_anomalies_scaled = scaler.fit_transform(data_anomalies)
+dbscan = DBSCAN(eps=1.5, min_samples=8)  # 2 à 4 fois le nombre de colonnes choisi
+clusters = dbscan.fit_predict(data_anomalies_scaled)
+data_anomalies['cluster'] = clusters
+outliers = data_anomalies[data_anomalies['cluster'] == -1]
+print("Number of outliers :", len(outliers))
+plt.figure(figsize=(10, 13))
+plt.scatter(data_anomalies['fk_prec_estim'], data_anomalies['tronc_diam'], c=data_anomalies['cluster'], cmap='coolwarm',
+            label='Clusters')
+plt.scatter(outliers['fk_prec_estim'], outliers['tronc_diam'], c='black', label='Outliers', marker='x')
+plt.xlabel("Précision de l'âge estimé")
+plt.ylabel("Diamètre du tronc")
+plt.title(
+    "Détection des Anomalies des Arbres avec DBSCAN, en fonction de la précision de l'âge estimé et du diamètre du tronc")
+plt.colorbar(label='Cluster')
+plt.show()
 
