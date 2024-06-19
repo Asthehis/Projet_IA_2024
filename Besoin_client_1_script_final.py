@@ -2,7 +2,7 @@
 import pandas as pd
 from sklearn.datasets import make_blobs
 from sklearn.metrics import silhouette_score
-from sklearn.cluster import SpectralClustering
+from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -25,9 +25,9 @@ def besoin_1(nb_clusters):
     scaler = StandardScaler()
     data_scaled = scaler.fit_transform(data_selection[['haut_tot']])
 
-    # Spectral clustering
-    spectral = SpectralClustering(n_clusters=nb_clusters)
-    labels = spectral.fit_predict(data_scaled)
+    # K-Means
+    k_means = KMeans(n_clusters=nb_clusters)
+    labels = k_means.fit_predict(data_scaled)
     score = silhouette_score(data_scaled, labels)
     print("Prédiction : ", labels)
     print("Silhouette score", score)
@@ -42,7 +42,7 @@ def besoin_1(nb_clusters):
     fig_1.show()
 
     # Fonctionnalité supplémentaire : Détection des anomalies
-    # Hauteur du tronc, haut_tot, tronc_diam, age_estim, fk_prec_estim
+    # tronc_diam, fk_prec_estim
     data_anomalies = data[["longitude", "latitude", "fk_prec_estim", "tronc_diam"]].copy()
     data_anomalies_scaled = scaler.fit_transform(data_anomalies)
     dbscan = DBSCAN(eps=1.5, min_samples=8) # 2 à 4 fois le nombre de colonnes choisi
@@ -56,6 +56,38 @@ def besoin_1(nb_clusters):
     plt.xlabel("Précision de l'âge estimé")
     plt.ylabel("Diamètre du tronc")
     plt.title("Détection des Anomalies des Arbres avec DBSCAN, en fonction de la précision de l'âge estimé et du diamètre du tronc")
+    plt.colorbar(label='Cluster')
+    plt.show()
+    # haut_tot, diam_tronc
+    data_anomalies = data[["longitude", "latitude", "haut_tot", "tronc_diam"]].copy()
+    data_anomalies_scaled = scaler.fit_transform(data_anomalies)
+    dbscan = DBSCAN(eps=1.5, min_samples=8) # 2 à 4 fois le nombre de colonnes choisi
+    clusters = dbscan.fit_predict(data_anomalies_scaled)
+    data_anomalies['cluster'] = clusters
+    outliers = data_anomalies[data_anomalies['cluster'] == -1]
+    print("Number of outliers :", len(outliers))
+    plt.figure(figsize=(10,13))
+    plt.scatter(data_anomalies['haut_tot'], data_anomalies['tronc_diam'], c=data_anomalies['cluster'], cmap='coolwarm', label = 'Clusters')
+    plt.scatter(outliers['haut_tot'], outliers['tronc_diam'], c='black', label='Outliers', marker='x')
+    plt.xlabel("Hauteur totale")
+    plt.ylabel("Diamètre du tronc")
+    plt.title("Détection des Anomalies des Arbres avec DBSCAN, en fonction de la hauteur totale et du diamètre du tronc")
+    plt.colorbar(label='Cluster')
+    plt.show()
+    # age_estim, tronc_diam
+    data_anomalies = data[["longitude", "latitude", "age_estim", "tronc_diam"]].copy()
+    data_anomalies_scaled = scaler.fit_transform(data_anomalies)
+    dbscan = DBSCAN(eps=1.5, min_samples=8) # 2 à 4 fois le nombre de colonnes choisi
+    clusters = dbscan.fit_predict(data_anomalies_scaled)
+    data_anomalies['cluster'] = clusters
+    outliers = data_anomalies[data_anomalies['cluster'] == -1]
+    print("Number of outliers :", len(outliers))
+    plt.figure(figsize=(10,13))
+    plt.scatter(data_anomalies['age_estim'], data_anomalies['tronc_diam'], c=data_anomalies['cluster'], cmap='coolwarm', label = 'Clusters')
+    plt.scatter(outliers['age_estim'], outliers['tronc_diam'], c='black', label='Outliers', marker='x')
+    plt.xlabel("Age estimé")
+    plt.ylabel("Diamètre du tronc")
+    plt.title("Détection des Anomalies des Arbres avec DBSCAN, en fonction de l'âge estimé et du diamètre du tronc")
     plt.colorbar(label='Cluster')
     plt.show()
 
