@@ -14,7 +14,7 @@ nb_clusters = int(input("Veuillez choisir un nombre de catégories : "))
 def besoin_1(nb_clusters):
     # Préparation des Données
     # Extraction des données d’intérêt : Sélectionner les colonnes pertinentes de la base de données selon ce besoin.
-    data = pd.read_csv("C:/Users/Lenovo/Downloads/Data_Arbre.csv")
+    data = pd.read_csv("Data_Arbre.csv")
     data_selection = data[["longitude", "latitude", "haut_tot"]].copy()
     print(data_selection.head())
     X, y = make_blobs(n_samples=len(data_selection))
