@@ -12,9 +12,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import normalized_mutual_info_score
 import matplotlib.pyplot as plt
 import plotly.express as px
-import numpy as np
 from sklearn.cluster import DBSCAN
-from sklearn.neighbors import NearestNeighbors
+
 
 
 # Préparation des Données
@@ -115,9 +114,8 @@ plt.show()
 
 
 # Visualisation sur la carte
-cluster = []
-spectral_test = SpectralClustering(n_clusters=3)
-labels_test = spectral_test.fit_predict(data_scaled)
+k_means_test = KMeans(n_clusters=3)
+labels_test = k_means_test.fit_predict(data_scaled)
 print(labels_test)
 data_selection = pd.concat([data_selection,pd.DataFrame({"cluster":labels_test})],axis=1)
 print(data_selection)
@@ -128,22 +126,6 @@ fig.show()
 fig_1.show()
 
 # Fonctionnalité supplémentaire : Détection des anomalies
-# Recherche du meilleur eps
-data_anomalies = data[["longitude", "latitude", "fk_prec_estim", "tronc_diam"]].copy()
-data_anomalies_scaled = scaler.fit_transform(data_anomalies)
-neighbors = NearestNeighbors(n_neighbors=10)
-neighbors_fit = neighbors.fit(data_anomalies_scaled)
-distances, indices = neighbors_fit.kneighbors(data_anomalies_scaled)
-
-# Trier les distances pour tracer la "coude"
-distances = np.sort(distances[:, 4], axis=0)
-plt.figure(figsize=(10, 6))
-plt.plot(distances)
-plt.ylabel('Distance')
-plt.xlabel('Points de données ordonnés')
-plt.title('Graphique des distances des K-Plus-Proches-Voisins')
-plt.show()
-
 # Hauteur du tronc, haut_tot, tronc_diam, age_estim, fk_prec_estim
 data_anomalies = data[["longitude", "latitude", "fk_prec_estim", "tronc_diam"]].copy()
 data_anomalies_scaled = scaler.fit_transform(data_anomalies)
