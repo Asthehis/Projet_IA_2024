@@ -1,12 +1,10 @@
 # Importation des librairies
 import pandas as pd
-from sklearn.datasets import make_blobs
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import plotly.express as px
-import numpy as np
 from sklearn.cluster import DBSCAN
 
 
@@ -17,7 +15,6 @@ def besoin_1(nb_clusters):
     data = pd.read_csv("Data_Arbre.csv")
     data_selection = data[["longitude", "latitude", "haut_tot"]].copy()
     print(data_selection.head())
-    X, y = make_blobs(n_samples=len(data_selection))
 
     # Apprentissage non supervisé
     # Choix de l'algorithme de clustering : Sélectionner un/des algorithme(s)de clustering pour séparer les arbres en groupes basés sur leur taille.
@@ -58,7 +55,6 @@ def besoin_1(nb_clusters):
     plt.xlabel("Précision de l'âge estimé")
     plt.ylabel("Diamètre du tronc")
     plt.title("Détection des Anomalies des Arbres avec DBSCAN, en fonction de la précision de l'âge estimé et du diamètre du tronc")
-    plt.colorbar(label='Cluster')
     plt.show()
     # haut_tot, diam_tronc
     data_anomalies = data[["longitude", "latitude", "haut_tot", "tronc_diam"]].copy()
@@ -74,7 +70,6 @@ def besoin_1(nb_clusters):
     plt.xlabel("Hauteur totale")
     plt.ylabel("Diamètre du tronc")
     plt.title("Détection des Anomalies des Arbres avec DBSCAN, en fonction de la hauteur totale et du diamètre du tronc")
-    plt.colorbar(label='Cluster')
     plt.show()
     # age_estim, tronc_diam
     data_anomalies = data[["longitude", "latitude", "age_estim", "tronc_diam"]].copy()
@@ -90,7 +85,6 @@ def besoin_1(nb_clusters):
     plt.xlabel("Age estimé")
     plt.ylabel("Diamètre du tronc")
     plt.title("Détection des Anomalies des Arbres avec DBSCAN, en fonction de l'âge estimé et du diamètre du tronc")
-    plt.colorbar(label='Cluster')
     plt.show()
 
 
