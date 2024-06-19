@@ -35,9 +35,10 @@ def besoin_1(nb_clusters):
 
     # Visualisation sur la carte
     data_selection = pd.concat([data_selection, pd.DataFrame({"cluster": labels})], axis=1)
-    fig = px.scatter(data_selection, x="latitude", y="longitude", color="cluster", size="haut_tot")
+    fig = px.scatter_mapbox(data_selection, lat="latitude", lon="longitude", color="cluster",  mapbox_style='open-street-map')
     fig_1 = px.box(data_selection, x="cluster", y="haut_tot")
-    fig.update_layout(mapbox_style = 'open-street-map')
+    fig.update_layout(mapbox=dict(style="open-street-map",zoom=12,center=dict(lat=data_selection["latitude"].mean(), 
+    lon=data_selection["longitude"].mean())),title_text="Dispersion des arbres par cluster")
     fig_1.update_layout(title_text="Hauteur des arbres dans chaque cluster")
     fig.show()
     fig_1.show()
