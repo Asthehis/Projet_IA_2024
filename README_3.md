@@ -8,7 +8,7 @@ Fonctionnement du programme final :
 
 – Il filtre les données de fk_arb_état pour ne prendre que Non essouché et Essouché.
 
-– Il normalise les données longitude, latitude, haut-tot, tronc-diam et haut-tronc.
+– Il normalise les données longitude, latitude, haut-tot, tronc-diam, haut-tronc et age_estim.
 
 – Il effectue les prédictions des modèles RandomForest et GradientBoostingClassifier.
 Le programme affiche ensuite la répartition des arbres sur une carte en fonction des prédictions du RandomForest.
