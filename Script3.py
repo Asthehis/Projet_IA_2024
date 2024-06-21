@@ -47,7 +47,7 @@ def prediction3(dataFrame):
     GBC_pred = GBC.predict(x_norm)
 
     # Affichage sur carte
-    y = arbre[['fk_arb_etat', 'latitude', 'longitude']].copy()
+    y = data[['fk_arb_etat', 'latitude', 'longitude']].copy()
     y= pd.concat([y, pd.DataFrame({'prediction': RF_pred})], axis=1)
     y=y.fillna(0)
     print(y)
