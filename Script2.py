@@ -1,5 +1,6 @@
 import pandas as pd 
 import pickle
+from sklearn.metrics import mean_squared_error, r2_score
 
 # Ecriture du script 
 def open_pickle(fileName):
@@ -42,18 +43,38 @@ def prediction2(dataFrame):
     RF = modeles['RandomForest']
     CART = modeles['DecisionTreeRegressor']
     GBR = modeles['GradientBoostingRegression']
+    KNN = modeles['KNeighborsRegressor']
     ETR = modeles['ExtraTreesRegressor']
     RF_pred = RF.predict(x_norm)
     CART_pred = CART.predict(x_norm)
     GBR_pred = GBR.predict(x_norm)
+    KNN_pred = KNN.predict(x_norm)
     ETR_pred = ETR.predict(x_norm)
 
+    # Calcul métrique 
+    RF_mse = mean_squared_error(y_norm, RF_pred)
+    RF_r2 = r2_score(y_norm, RF_pred)
+    CART_mse = mean_squared_error(y_norm, CART_pred)
+    CART_r2 = r2_score(y_norm, CART_pred)
+    GBR_mse = mean_squared_error(y_norm, GBR_pred)
+    GBR_r2 = r2_score(y_norm, GBR_pred)
+    KNN_mse = mean_squared_error(y_norm, KNN_pred)
+    KNN_r2 = r2_score(y_norm, KNN_pred)
+    ETR_mse = mean_squared_error(y_norm, ETR_pred)
+    ETR_r2 = r2_score(y_norm, ETR_pred)
+    print(f"Random Forest -> Mean Squared Error: {RF_mse}, R^2 Score: {RF_r2}")
+    print(f"DecisionTreeRegression -> Mean Squared Error: {CART_mse}, R^2 Score: {CART_r2}")
+    print(f"GradientBoostingRegressor -> Mean Squared Error: {GBR_mse}, R^2 Score: {GBR_r2}")
+    print(f"KNeighborsRegressor -> Mean Squared Error: {KNN_mse}, R^2 Score: {KNN_r2}")
+    print(f"KNeighborsRegressor -> Mean Squared Error: {ETR_mse}, R^2 Score: {ETR_r2}")
+    
 
     # Les valeurs prédites seront normalisées, les "dénormaliser"
     SC_y = modeles['scaler_y']
     RF_pred = SC_y.inverse_transform(RF_pred.reshape(-1, 1)).ravel()
     CART_pred = SC_y.inverse_transform(CART_pred.reshape(-1, 1)).ravel()
     GBR_pred =SC_y.inverse_transform(GBR_pred.reshape(-1, 1)).ravel()
+    KNN_pred =SC_y.inverse_transform(KNN_pred.reshape(-1, 1)).ravel()
     ETR_pred =SC_y.inverse_transform(ETR_pred.reshape(-1, 1)).ravel()
 
     # Création d'un dictionnaire pour renvoyer les valeurs
