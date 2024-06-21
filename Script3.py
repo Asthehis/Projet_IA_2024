@@ -1,11 +1,6 @@
 import pandas as pd 
-import json
 import pickle
-import csv
 import plotly.express as px
-
-# Récupération des données
-arbre = pd.read_csv("Data_Arbre.csv")
 
 def open_pickle(fileName):
     with open(fileName, 'rb') as f:
@@ -52,26 +47,15 @@ def prediction3(dataFrame):
     y=y.fillna(0)
     print(y)
     fig = px.scatter_mapbox(y, lat= 'latitude', lon='longitude', color='prediction', mapbox_style='open-street-map')
-    fig.update_layout (mapbox=dict(style= 'open-street-map', zoom=12, center=dict(lat=y['latitude'].mean(), lon=y['longitude'].mean())), title_text="Arbre potentiel a être arraché")
+    fig.update_layout (mapbox=dict(style= 'open-street-map', zoom=12, center=dict(lat=y['latitude'].mean(), lon=y['longitude'].mean())), title_text="Prédiction RandomForest des arbres succeptible d'être arraché pendant la tempête")
     fig.show()
 
-def csv_to_json(csvFilePath, jsonFilePath):
-    jsonArray = []
-      
-    #read csv file
-    with open(csvFilePath, encoding='utf-8') as csvf: 
-        #load csv file data using csv library's dictionary reader
-        csvReader = csv.DictReader(csvf) 
+    y = data[['fk_arb_etat', 'latitude', 'longitude']].copy()
+    y= pd.concat([y, pd.DataFrame({'prediction': GBC_pred})], axis=1)
+    y=y.fillna(0)
+    print(y)
+    fig = px.scatter_mapbox(y, lat= 'latitude', lon='longitude', color='prediction', mapbox_style='open-street-map')
+    fig.update_layout (mapbox=dict(style= 'open-street-map', zoom=12, center=dict(lat=y['latitude'].mean(), lon=y['longitude'].mean())), title_text="Prédiction GradientBoostingRegressor des arbres succeptible d'être arraché pendant la tempête")
+    fig.show()
 
-        #convert each csv row into python dict
-        for row in csvReader: 
-            #add this python dict to json array
-            jsonArray.append(row)
-  
-    #convert python jsonArray to JSON String and write to file
-    with open(jsonFilePath, 'w', encoding='utf-8') as jsonf: 
-        jsonString = json.dumps(jsonArray, indent=4)
-        jsonf.write(jsonString)
-
-csv_to_json('Data_Arbre.csv', 'Data_Arbre.json')
-prediction3('Data_Arbre.json')
+prediction3('Data_Test3.json')

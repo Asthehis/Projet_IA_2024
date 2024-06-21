@@ -1,10 +1,5 @@
 import pandas as pd 
-import json
 import pickle
-import csv
-
-# Récupération des données
-arbre = pd.read_csv("Data_Arbre.csv")
 
 # Ecriture du script 
 def open_pickle(fileName):
@@ -35,10 +30,13 @@ def prediction2(dataFrame):
 
     # Sélection des données
     x = data[['haut_tronc', 'fk_stadedev', 'tronc_diam', 'haut_tot', 'fk_nomtech']].copy()
+    y = data[['age_estim']].copy()
     
     # Vérifier que les données soient normalisées, normaliser sinon
     SC_x = modeles['scaler_x']
+    SC_y = modeles['scaler_y']
     x_norm = SC_x.transform(x)
+    y_norm = SC_y.transform(y)
 
     # Prédictions
     RF = modeles['RandomForest']
@@ -56,38 +54,22 @@ def prediction2(dataFrame):
     RF_pred = SC_y.inverse_transform(RF_pred.reshape(-1, 1)).ravel()
     CART_pred = SC_y.inverse_transform(CART_pred.reshape(-1, 1)).ravel()
     GBR_pred =SC_y.inverse_transform(GBR_pred.reshape(-1, 1)).ravel()
-    ETR_pred =SC_y.inverse_transform(GBR_pred.reshape(-1, 1)).ravel()
+    ETR_pred =SC_y.inverse_transform(ETR_pred.reshape(-1, 1)).ravel()
 
     # Création d'un dictionnaire pour renvoyer les valeurs
     predictions = {
-        'RandomForest' : RF_pred.tolist(),
-        'DecisionTreeRegressor' : CART_pred.tolist(),
-        'GradientBoostingRegression' : GBR_pred.tolist(),
-        'ExtraTreesRegressor' : ETR_pred.tolist()
+        'RandomForest' : RF_pred,
+        'DecisionTreeRegressor' : CART_pred,
+        'GradientBoostingRegression' : GBR_pred,
+        'ExtraTreesRegressor' : ETR_pred
     }
 
-    json_predictions = json.dumps(predictions)
+    # Création d'un DataFrame pour les prédictions
+    predictions_df = pd.DataFrame(predictions)
 
-    return json_predictions
+    # Sauvegarder les prédictions en fichier JSON
+    predictions_df.to_json('prediction2.json', orient='records')
 
-def csv_to_json(csvFilePath, jsonFilePath):
-    jsonArray = []
-      
-    #read csv file
-    with open(csvFilePath, encoding='utf-8') as csvf: 
-        #load csv file data using csv library's dictionary reader
-        csvReader = csv.DictReader(csvf) 
+    return predictions_df
 
-        #convert each csv row into python dict
-        for row in csvReader: 
-            #add this python dict to json array
-            jsonArray.append(row)
-  
-    #convert python jsonArray to JSON String and write to file
-    with open(jsonFilePath, 'w', encoding='utf-8') as jsonf: 
-        jsonString = json.dumps(jsonArray, indent=4)
-        jsonf.write(jsonString)
-
-csv_to_json('Data_Arbre.csv', 'Data_Arbre.json')
-pred = prediction2('Data_Arbre.json')
-print(pred)
+prediction2('Data_Test2.json')
